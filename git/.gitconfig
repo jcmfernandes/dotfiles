@@ -1,0 +1,5 @@
+[merge]
+	conflictstyle = diff3
+[user]
+	email = joao.fernandes@ist.utl.pt
+	name = Joao Fernandes
