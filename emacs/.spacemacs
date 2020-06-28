@@ -30,30 +30,63 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
-     html
-     yaml
-     ;; ----------------------------------------------------------------
-     ;; Example of useful layers you may want to use right away.
-     ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
-     ;; <M-m f e R> (Emacs style) to install them.
-     ;; ----------------------------------------------------------------
+   `(
+     asciidoc
+     (auto-completion :variables
+                      auto-completion-enable-help-tooltip t
+                      auto-completion-enable-snippets-in-popup t
+                      auto-completion-enable-sort-by-usage t)
+     better-defaults
+     (clojure :variables
+              clojure-toplevel-inside-comment-form t
+              clojure-enable-linters 'clj-kondo)
+     colors
+     command-log
+     crystal
+     csv
+     dap
+     docker
+     emacs-lisp
+     emoji
+     (git :variables
+          magit-diff-refine-hunk 'all)
+     github
      helm
+     html
+     html
+     javascript
+     json
+     lsp
+     markdown
+     multiple-cursors
+     org
+     (ranger :variables
+             ranger-show-preview t
+             ranger-show-hidden t
+             ranger-cleanup-eagerly t
+             ranger-cleanup-on-disable t
+             ranger-ignored-extensions '("mkv" "flv" "iso" "mp4"))
      (ruby :variables
            ruby-enable-enh-ruby-mode t
-           ruby-test-runner 'rspec)
-     auto-completion
-     better-defaults
-     emacs-lisp
-     git
-     markdown
-     org
+           ruby-test-runner 'rspec
+           ruby-backend 'lsp)
      (shell :variables
+            shell-default-shell 'multi-term
+            shell-default-term-shell ,(getenv "SHELL")
+            shell-default-full-span t
             shell-default-height 30
-            shell-default-position 'bottom)
+            shell-default-position 'left)
      spell-checking
-     syntax-checking
+     sql
+     (syntax-checking :variables
+                      syntax-checking-use-original-bitmaps t)
+     (treemacs :variables
+               treemacs-indentation 1
+               treemacs-use-filewatch-mode t
+               treemacs-use-follow-mode t)
+     typescript
      version-control
+     yaml
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -131,14 +164,14 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '(spacemacs-light
+                         spacemacs-dark)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Variable"
-                               :size 16
+   dotspacemacs-default-font `(,(if (eq system-type 'gnu/linux) "Source Code Pro" "Source Code Pro")
+                               :size 14
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -314,7 +347,6 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-
   ; Show trailing white spaces
   (setq show-trailing-whitespace t)
   ; Setup multiple cursors
@@ -322,6 +354,39 @@ you should place your code here."
   (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+  ;; Make command the meta key on OSX
+  (setq mac-option-key-is-meta nil
+        mac-command-key-is-meta t
+        mac-command-modifier 'meta
+        mac-option-modifier 'super)
+  ;; Paste from the clipboard when in term mode
+  (spacemacs/set-leader-keys-for-major-mode 'term-mode "y" 'term-paste)
+  ;; UTF-8, everywhere
+  (prefer-coding-system 'utf-8)
+  (set-language-environment 'utf-8)
+  (setq locale-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (set-selection-coding-system 'utf-8)
+  (set-file-name-coding-system 'utf-8)
+  (set-clipboard-coding-system 'utf-8)
+  (set-buffer-file-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+  ;; Blink dat cursor!
+  (blink-cursor-mode)
+  ;; Add dat newline at the EOF!
+  (setq-default require-final-newline t)
+  ;; Don't add the encoding magic header
+  (setq enh-ruby-add-encoding-comment-on-save nil)
+  ;; Unbind mouse scroll wheel font increase/decrease
+  (global-unset-key (kbd "<C-wheel-down>"))
+  (global-unset-key (kbd "<C-wheel-up>"))
+  ;; Unbind keys when in multi-term
+  (setq term-unbind-key-list '("C-x" "C-h" "C-y" "<ESC>"))
+  ;; Add key-bindings for navigating through windows
+  (global-set-key (kbd "C-x o") 'next-multiframe-window)
+  (global-set-key (kbd "C-x p") 'previous-multiframe-window)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -331,9 +396,15 @@ you should place your code here."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (multiple-cursors web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data yaml-mode xterm-color unfill smeargle shell-pop rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mwim multi-term mmm-mode minitest markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help enh-ruby-mode diff-hl company-statistics company chruby bundler inf-ruby auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (tide typescript-mode handlebars-mode sql-indent web-beautify livid-mode skewer-mode simple-httpd js2-refactor js2-mode js-doc company-tern dash-functional tern coffee-mode csv-mode magit-gh-pulls github-search github-clone transient lv github-browse-file gist gh marshal logito pcache ht dockerfile-mode docker json-mode tablist docker-tramp json-snatcher json-reformat multiple-cursors web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data yaml-mode xterm-color unfill smeargle shell-pop rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mwim multi-term mmm-mode minitest markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md fuzzy flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck evil-magit magit magit-popup git-commit with-editor eshell-z eshell-prompt-extras esh-help enh-ruby-mode diff-hl company-statistics company chruby bundler inf-ruby auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(rubocop-prefer-system-executable t)
+ '(safe-local-variable-values (quote ((whitespace-line-column . 80)))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
